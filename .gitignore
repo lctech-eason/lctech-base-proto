@@ -1,0 +1,8 @@
+# node
+.npmrc
+package-lock.json
+# mac
+.idea
+.DS_Store
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json

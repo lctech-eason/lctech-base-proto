@@ -1,0 +1,10 @@
+/doc
+/.github
+/dist/csharp
+/dist/go
+/dist/php
+/dist/python
+/dist/ruby
+/dist/swift
+gha-creds-*.json
+makefile

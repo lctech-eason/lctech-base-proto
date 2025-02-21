@@ -1,0 +1,19 @@
+#!/bin/bash
+
+GIT_ROOT=$(git rev-parse --show-toplevel)
+
+# Find all .proto files in the directory
+PROTO_FILES=$(find "$GIT_ROOT" -name "*.proto")
+
+# Regular expression to match package variable pattern
+PACKAGE_REGEX="^package\s+([a-z0-9]+)\.([a-z0-9]+)\.([a-z0-9]+)\.([a-z0-9]+)$"
+
+for file in $PROTO_FILES; do
+  package=$(grep -E "$PACKAGE_REGEX" "$file" | sed -E "s/$PACKAGE_REGEX/\1.\2.v\3/")
+
+  # Check if the package matches the expected pattern
+  if [ "$package" != "$(basename "$GIT_ROOT").$(basename "$(dirname "$file")").$(basename "$file" .proto)" ]; then
+    echo "ERROR: $file has package $package, but it should be $(basename "$GIT_ROOT").$(basename "$(dirname "$file")").$(basename "$file" .proto)"
+    exit 1
+  fi
+done

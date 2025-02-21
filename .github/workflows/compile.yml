@@ -1,0 +1,69 @@
+name: Build Proto
+# proto -> Auto compile -> git added tag -> update npm version -> npm publish
+on:
+  push:
+    branches: [master,main]
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'Initial commit') && !contains(github.event.head_commit.message, 'ci: ') "
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Git
+      run: |
+        git config --global url."https://${{ secrets.CI_TOKEN }}:x-oauth-basic@github.com/lctech-tw".insteadOf "https://github.com/lctech-tw"
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+    - name: 📦 Compile
+      run: |
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lctech-tw/util_scripts/main/proto/dependent-proto.sh)"
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lctech-tw/util_scripts/main/proto/compile.sh)"
+    - name: 🐣 Printenv
+      run: printenv
+    - name: ⚙️ Authenticate to Google Cloud
+      if: always()
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json:  ${{ secrets.GCP_SA_KEY_GITHUB_CI }}
+    - name: ⚙️ Initialize Google Cloud SDK
+      if: always()
+      uses: google-github-actions/setup-gcloud@v2
+    - name: <GoLang> Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '^1.19.0'
+    - name: <GoLang> Check go.mod
+      run: sh .github/scripts/init-go.sh "$GITHUB_REPOSITORY"
+    - name: <NPM> Set up node
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    - name: <NPM> Authenticate with GitHub package registry
+      run: |
+        echo "//npm.pkg.github.com:_authToken=${{ secrets.CI_TOKEN }}" >> .npmrc 
+        echo "//npm.pkg.github.com/:_authToken=${{ secrets.CI_TOKEN }}" >> .npmrc 
+        echo "@lctech-tw=https://npm.pkg.github.com/lctech-tw" >> .npmrc
+    - name: <NPM> Update version
+      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/lctech-tw/util_scripts/main/modify_version.sh)"
+    - name: <NPM> install & Publish package
+      run: rm -f package-lock.json && npm i && npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: <GIT> Commit & Tag & Push
+      run: |
+        sudo chown -R $(whoami) .git/* && sudo git add -A
+        sudo git commit -m "ci: Auto-Compile [$(git log -1 --pretty=format:"%s")]"
+        sudo git push origin &
+        echo "$TAG_VERSION" && git tag "$TAG_VERSION"
+        sudo git push origin "$TAG_VERSION"
+    - name: Slack Notification
+      if: always()
+      run: |
+        curl -LJO https://raw.githubusercontent.com/lctech-tw/util_scripts/main/notify_slack.sh 
+        if [[ '${{ job.status }}' == 'failure' ]] ;then
+          echo "Run slack on Fail (X)"
+          bash ./notify_slack.sh -f -g=rdc02
+        else
+          echo "Run slack on Success (O)"
+          bash ./notify_slack.sh -s -g=rdc02
+        fi

@@ -1,0 +1,17 @@
+syntax = 'proto3';
+
+package lctech_base.example;
+
+option go_package = "lctech-base-proto/dist/go/example";
+
+service ExampleService {
+    //  Account 相關
+    rpc Example (ExampleReq) returns (ExampleRes);
+}
+  
+message ExampleReq {
+}
+
+message ExampleRes {
+
+}
