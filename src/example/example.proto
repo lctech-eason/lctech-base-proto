@@ -2,7 +2,7 @@ syntax = 'proto3';
 
 package lctech_base.example;
 
-option go_package = "lctech-base-proto/dist/go/example";
+option go_package = "github.com/lctech-eason/lctech-base-proto/dist/go/example";
 
 service ExampleService {
     //  Account 相關

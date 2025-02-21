@@ -5,7 +5,7 @@
 require 'google/protobuf'
 
 
-descriptor_data = "\n\x15\x65xample/example.proto\x12\x13lctech_base.example\"\x0c\n\nExampleReq\"\x0c\n\nExampleRes2]\n\x0e\x45xampleService\x12K\n\x07\x45xample\x12\x1f.lctech_base.example.ExampleReq\x1a\x1f.lctech_base.example.ExampleResB#Z!lctech-base-proto/dist/go/exampleb\x06proto3"
+descriptor_data = "\n\x15\x65xample/example.proto\x12\x13lctech_base.example\"\x0c\n\nExampleReq\"\x0c\n\nExampleRes2]\n\x0e\x45xampleService\x12K\n\x07\x45xample\x12\x1f.lctech_base.example.ExampleReq\x1a\x1f.lctech_base.example.ExampleResB;Z9github.com/lctech-eason/lctech-base-proto/dist/go/exampleb\x06proto3"
 
 pool = Google::Protobuf::DescriptorPool.generated_pool
 pool.add_serialized_file(descriptor_data)

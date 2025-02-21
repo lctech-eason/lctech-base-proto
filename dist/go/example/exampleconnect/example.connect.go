@@ -8,7 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	example "lctech-base-proto/dist/go/example"
+	example "github.com/lctech-eason/lctech-base-proto/dist/go/example"
 	http "net/http"
 	strings "strings"
 )
